@@ -132,7 +132,7 @@ Results saved to runs/predict-seg/exp2
 
 打开文件夹runs/predict-seg/exp2，效果如
 
-![image-20240212092351681](/tls_visualtask/pic/image-20240212092351681.png)
+![image-20240212092351681](pic/image-20240212092351681.png)
 
 ##### 0.数据集准备
 
@@ -254,7 +254,7 @@ names:
  0: pointer
  1: digital
 ```
-![dataset](/tls_visualtask/pic/dataset.png)
+![dataset](pic/dataset.png)
 
 yolov5n.yaml 将nc更改成自己数据集类别数量
 
