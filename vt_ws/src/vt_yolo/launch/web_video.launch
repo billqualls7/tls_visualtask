@@ -1,0 +1,14 @@
+<launch>
+  <node pkg="web_video_server" type="web_video_server" name="vt_web_video" output="screen">
+    <param name="port" type="int" value="8080" />
+    <param name="address" type="string" value="192.168.1.11" />
+    <param name="server_threads" type="int" value="1" />
+    <param name="ros_threads" type="string" value="2" />
+
+    <param name="width" type="int" value="640" />
+    <param name="height" type="int" value="480" />
+    <param name="quality" type="int" value="45" />
+    <param name="type" type="string" value="ros_compressed" />
+    <param name="default_transport " type="string" value="compressed" />
+  </node>
+</launch>

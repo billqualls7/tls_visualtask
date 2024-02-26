@@ -1,0 +1,6 @@
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/yolov5_seg.dir
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/edit_cache.dir
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/yolov5_cls.dir
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/myplugins.dir
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/rebuild_cache.dir
+/home/epaicar/tls_visualtask/yolov5_seg/deploy/build/CMakeFiles/yolov5_det.dir

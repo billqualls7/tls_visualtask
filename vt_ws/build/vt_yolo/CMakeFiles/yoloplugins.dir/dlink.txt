@@ -1,0 +1,1 @@
+/usr/local/cuda/bin/nvcc   -g -Xcompiler=-fPIC -Wno-deprecated-gpu-targets -shared -dlink CMakeFiles/yoloplugins.dir/lib/yololayer.cu.o -o CMakeFiles/yoloplugins.dir/cmake_device_link.o 

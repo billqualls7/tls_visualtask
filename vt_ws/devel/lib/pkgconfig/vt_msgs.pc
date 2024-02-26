@@ -1,0 +1,8 @@
+prefix=/home/epaicar/tls_visualtask/vt_ws/devel
+
+Name: vt_msgs
+Description: Description of vt_msgs
+Version: 0.0.0
+Cflags: -I/home/epaicar/tls_visualtask/vt_ws/devel/include -I/home/epaicar/tls_visualtask/vt_ws/src/vt_msgs/include
+Libs: -L${prefix}/lib 
+Requires: roscpp rospy std_msgs message_runtime
