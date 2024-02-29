@@ -2,7 +2,7 @@
 Author: EPAICAR EPAICAR@EPAICAR
 Date: 2024-02-22 22:16:47
 LastEditors: EPAICAR EPAICAR@EPAICAR
-LastEditTime: 2024-02-26 22:20:41
+LastEditTime: 2024-02-28 16:51:53
 FilePath: /epaicar/tls_visualtask/vt_ws/src/vt_yolo/src/videocapture.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -12,7 +12,8 @@ import threading
 import time
 import rospy 
 from cv_bridge import CvBridge
-
+from sensor_msgs.msg import CompressedImage
+from sensor_msgs.msg import Image
 # 自定义无缓存读视频类
 class VideoCapture:
     """Customized VideoCapture, always read latest frame """

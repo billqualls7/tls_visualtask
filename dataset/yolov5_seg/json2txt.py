@@ -2,7 +2,7 @@
 Author: EPAICAR EPAICAR@EPAICAR
 Date: 2024-02-26 20:34:45
 LastEditors: EPAICAR EPAICAR@EPAICAR
-LastEditTime: 2024-02-26 20:39:20
+LastEditTime: 2024-02-28 16:27:23
 FilePath: /epaicar/tls_visualtask/dataset/yolov5_seg/json2txt.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -60,7 +60,7 @@ def labelme2yolov2Seg(jsonfilePath="", resultDirPath="", classList=["buds"]):
  
 if __name__ == "__main__":
     jsonfilePath = "/home/epaicar/tls_visualtask/dataset/yolov5_seg/labelme"  # 要转换的json文件所在目录
-    resultDirPath = "/home/epaicar/tls_visualtask/dataset/yolov5_seg/label"  # 要生成的txt文件夹
+    resultDirPath = "/home/epaicar/tls_visualtask/dataset/yolov5_seg/labels"  # 要生成的txt文件夹
     classList =  ['left',
                   'right',
                   'leftbroken',

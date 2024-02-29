@@ -1,10 +1,11 @@
-cam_device: 1
+cam_device: 0
 
 engine_file_path: "../model/carlinebest.engine"
 
 CONF_THRESH: 0.5
 IOU_THRESHOLD: 0.4
 
+colorful: False
 categories: ['left',
              'right',
              'leftbroken',

@@ -136,11 +136,74 @@ Results saved to runs/predict-seg/exp2
 
 ##### 0.数据集准备
 
+使用labelme进行标注，标注完成之后请将标签顺序保存到txt文件中，这个顺序很重要会在很多地方使用到。
+
+标注之后会得到json格式的标注文件，可参考dataset/yolov5_seg/labelme
+
+使用dataset/yolov5_seg/getimages.py将数据集所有图片存放到images文件夹中
+
+使用dataset/yolov5_seg/json2txt.py将数据集json格式标签转为yolo格式
+
+```python
+
+    classList =  ['left',
+                  'right',
+                  'leftbroken',
+                  'rightbroken',
+                  'rightround_l',
+                  'rightround_r',
+                  'leftround_l',
+                  'leftround_r']      # 这个标签顺序和labelme里面的保持一致
+```
+
+使用dataset/yolov5_seg/make_dataset.py将数据集划分为训练集、验证集、测试集
+
+
+
 ##### 1.训练
+
+进入**mydata**文件夹，有三个参数文件
+
+```bash
+carline-seg.yaml  hyp.scratch-low.yaml   yolov5n-seg.yaml
+```
+
+carline-seg.yaml
+
+```yaml
+path: /dataset/YOLO				# 数据集所在根目录 该目录下需要有训练集、验证集、测试集
+train: dataset_seg 
+val: dataset_seg 
+test: 
+
+# Classes
+names:							# 这个标签顺序和labelme里面的保持一致 
+  0: left
+  1: right
+  2: leftbroken
+  3: rightbroken
+  4: rightround_l
+  5: rightround_r
+  6: leftround_l
+  7: leftround_r
+```
+
+hyp.scratch-low.yaml 在第一次训练的时候不用更改，以第一次训练的模型为参考若不满意则自行进行微调
+
+yolov5n-seg.yaml
+
+```
+# Parameters
+nc: 8  # number of classes
+```
+
+进入yolov5_train文件夹目录执行训练指令，训练结束之后根据终端提示找到训练完成的模型best.pt
 
 ```bash
 python segment/train.py --epochs 300 --data mydata/carline-seg.yaml --weight yolov5n7-seg.pt --img 640 --cfg mydata/yolov5n-seg.yaml --hyp mydata/hyp.scratch-low.yaml
 ```
+
+模型一般保存在yolov5_train/runs/train_seg/exp/weights
 
 
 
@@ -224,6 +287,8 @@ Build engine successfully!
 ```
 
 【注意】：这里需要注意的是seg模型和det模型使用的是同一个参数文件进行模型导出，当两个模型的数据集种类不一样时，在每次导出之前都需要修改参数文件并且重新编译整个工程，然后再执行模型转换脚本
+
+#### ROS
 
 
 
