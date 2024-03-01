@@ -289,7 +289,49 @@ Build engine successfully!
 【注意】：这里需要注意的是seg模型和det模型使用的是同一个参数文件进行模型导出，当两个模型的数据集种类不一样时，在每次导出之前都需要修改参数文件并且重新编译整个工程，然后再执行模型转换脚本
 
 #### ROS
+将生成的engine文件拷贝到tls_visualtask/vt_ws/src/vt_yolo/model
 
+```bash
+cp carlinebest.engine ~/tls_visualtask/vt_ws/src/vt_yolo/model/
+```
+
+修改推理配置文件tls_visualtask/vt_ws/src/vt_yolo/config/yolov5_det.yaml
+
+```yaml
+cam_device: 0  										# 摄像头设备号
+
+engine_file_path: "../model/carlinebest.engine"    	# 序列文件路径
+
+CONF_THRESH: 0.5									# 置信度
+IOU_THRESHOLD: 0.4									# IOU阈值
+
+colorful: False										# 彩色可视化（待移植）
+categories: ['left',								# 这个标签顺序和labelme里面的保持一致 
+             'right',
+             'leftbroken',
+             'rightbroken',
+             'rightround_l',
+             'rightround_r',
+             'leftround_l',
+             'leftround_r']
+```
+
+打开终端
+
+```
+rosocre
+```
+
+
+
+另外打开一个终端
+
+```bash
+roscd vt_yolo/src/
+python3 yolov5_seg_node.py
+```
+
+相关话题 /yolo/carlinebias
 
 
 ### Det
