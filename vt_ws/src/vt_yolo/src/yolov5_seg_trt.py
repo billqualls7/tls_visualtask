@@ -131,6 +131,7 @@ class YoLov5TRT(object):
         
         # Draw mask
         self.colors_obj = Colors()
+        self.result_masks = np.zeros((1, 240, 320))
 
     def infer(self, raw_image_generator):
         threading.Thread.__init__(self)
@@ -177,6 +178,7 @@ class YoLov5TRT(object):
         # Here we use the first row of output in that batch_size = 1
         output_bbox = host_outputs[0]
         output_proto_mask = host_outputs[1]
+        
         # Do postprocess
         for i in range(self.batch_size):
             result_boxes, result_scores, result_classid, result_proto_coef = self.post_process(
@@ -184,8 +186,8 @@ class YoLov5TRT(object):
             )
             if result_proto_coef.shape[0] == 0:
                 continue
-            result_masks = self.process_mask(output_proto_mask, result_proto_coef, result_boxes, batch_origin_h[i], batch_origin_w[i])
-
+            self.result_masks = self.process_mask(output_proto_mask, result_proto_coef, result_boxes, batch_origin_h[i], batch_origin_w[i])
+            # print((result_masks.shape))
             # Draw masks on  the original image
             # self.draw_mask(result_masks, colors_=[self.colors_obj(x, True) for x in result_classid],im_src=batch_image_raw[i])
 
@@ -199,7 +201,7 @@ class YoLov5TRT(object):
             #             categories[int(result_classid[j])], result_scores[j]
             #         ),
             #     )
-        return result_masks
+        return self.result_masks
 
     def destroy(self):
         # Remove any context from the top of the context stack, deactivating it.
