@@ -6,7 +6,6 @@ LastEditTime: 2024-03-01 22:50:56
 FilePath: /rqh/demo_py/getbias.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
-import numba
 import numpy as np
 import time
 import cv2
@@ -32,7 +31,7 @@ class GetAngle:
     def __init__(self):
         self.nwindows = 4
         self.margin = 100
-        self.minpix = 100
+        self.minpix = 30
         self.minLane = 100
         
         self.height = 240
@@ -73,6 +72,9 @@ class GetAngle:
         '''        
         nonzero_coords = cv2.findNonZero(img_half)
         fit =[-100,-100,-100]
+
+        temp_xy = []
+        mutation = False
         if nonzero_coords is not None:
             nonzero_coords = nonzero_coords[:, 0, :]  # 剥离多余的维度
             nonzeroy = nonzero_coords[:, 1]
@@ -93,16 +95,61 @@ class GetAngle:
                 lane_inds.append(good_inds)
                 if len(good_inds) > self.minpix:
                     x_current = np.int32(np.mean(nonzerox[good_inds]))
+                    y_current = np.int32(np.mean(nonzeroy[good_inds]))
+                    # k = y_current/x_current
+                    temp_xy.append((x_current, y_current))
+                    
+                    # print(k)
+                    cv2.circle(img_half, (x_current, y_current), radius=5, color=(0, 0, 0), thickness=-1)
+                    # 
+            print("=================")
+
+            temp_xy_len = len(temp_xy)
+            if  temp_xy_len< 3:
+                print('\033[31m no lines \033[0m')   
+            else:
+                for i in range(temp_xy_len-1):
+                    A = temp_xy[0]
+                    B = temp_xy[1]
+                    k = (A[1]-B[1])/(A[0]-B[0])
+                    del temp_xy[0]
+                    if i == 0:
+                        last_k = k
+                        # print("k", k)
+
+                        continue
+
+                    error = abs(k-last_k)
+                    last_k = k
+                    
+                    # print(A)
+                    # print("error", error)
+                    # print("k", k)
+
+                    if error > 10:    #阈值
+                        print("突变了")
+                        mutation = True
+                if not mutation:    # 如果没有突变
+                    lane_inds = np.concatenate(lane_inds)
+                    x = nonzerox[lane_inds] + trans
+                    y = nonzeroy[lane_inds] 
+                    fit = np.polyfit(y, x, 2)
+                    
+                    return fit, mutation
+                else:
+                    return [-1,-1,-1], mutation
+
+
+                    # print(k)
+
+
+
+        # try:
+        #     fit = np.polyfit(y, x, 2)
+        #     return fit
+        # except: 
             
-            lane_inds = np.concatenate(lane_inds)
-            x = nonzerox[lane_inds] + trans
-            y = nonzeroy[lane_inds] 
-        try:
-            fit = np.polyfit(y, x, 2)
-            return fit
-        except: 
-            
-            return fit
+        #     return fit
         
 
 
@@ -149,6 +196,18 @@ class GetAngle:
             win_xright_low = rightx_current - self.margin
             win_xright_high = rightx_current + self.margin
 
+            if win_xleft_high > self.midpoint:
+                temp = win_xleft_high - self.midpoint
+                win_xleft_high = win_xleft_high - temp
+                win_xleft_low = win_xleft_low - temp
+                print('change_left')  
+            if win_xright_low <self.midpoint:
+                temp = self.midpoint - win_xright_low
+                win_xright_low += temp
+                win_xright_high += temp  
+                print("change_right")
+
+            
             good_left_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) &
             (nonzerox >= win_xleft_low) &  (nonzerox < win_xleft_high)).nonzero()[0]
             good_right_inds = ((nonzeroy >= win_y_low) & (nonzeroy < win_y_high) &
@@ -157,35 +216,44 @@ class GetAngle:
             left_lane_inds.append(good_left_inds)
             right_lane_inds.append(good_right_inds)
             # If you found > minpix pixels, recenter next window on their mean position
-            if len(good_left_inds) > self.minpix:
+            if len(good_left_inds) > self.minpix:#指定的阈值 minpix
                 leftx_current = np.int32(np.mean(nonzerox[good_left_inds]))
+                lefty_current = np.int32(np.mean(nonzeroy[good_left_inds]))
+                
+                # left_cnt+=1
+                # if left_cnt >=2:
+                left_can = 1#标志位，表示可以进一步搜索车道线
+            print('minpix(right):'+str(len(good_right_inds)))
             if len(good_right_inds) > self.minpix:
                 rightx_current = np.int32(np.mean(nonzerox[good_right_inds]))
-        t1 = time.time()
-        # print("for:",(t1-t0)*1000)
+                # right_cnt+=1
+                # if right_cnt >=2:
+                right_can = 1
+        print('left_can:'+str(left_can))  
+        print('right_can:'+str(right_can))
         # Concatenate the arrays of indices
-        left_lane_inds = np.concatenate(left_lane_inds)
+        left_lane_inds = np.concatenate(left_lane_inds)#left_lane_inds 是一个列表，其中包含了每个窗口内找到的左车道线的非零像素点的索引数组
+        print(left_lane_inds)
         right_lane_inds = np.concatenate(right_lane_inds)
-
+        print(right_lane_inds)
         # Extract left and right line pixel positions
-        leftx = nonzerox[left_lane_inds]
+        leftx = nonzerox[left_lane_inds]#leftx 和 lefty 是左车道线的非零像素点在 x 和 y 方向上的坐标。
         lefty = nonzeroy[left_lane_inds]
         rightx = nonzerox[right_lane_inds]
         righty = nonzeroy[right_lane_inds]
 
-        # Fit a second order polynomial to each
-        try:
-            t0 = time.time()
-            left_fit = np.polyfit(lefty, leftx, 2)
+        if left_can == 1 and right_can == 1:
+            left_fit = np.polyfit(lefty, leftx, 2)#则分别使用 np.polyfit() 函数拟合左右车道线的二次多项式曲线，并返回拟合系数 left_fit 和 right_fit
             right_fit = np.polyfit(righty, rightx, 2)
-            t1 = time.time()
-            # print("polyfit:",(t1-t0)*1000)
-            # print(right_fit)
-            
-            return left_fit, right_fit
-        except:
-            # print(previous_right_fit)
-            return [-100, -100, -100], [-100, -100, -100]
+            return left_fit, right_fit,left_can,right_can
+        elif left_can == 1 and right_can == 0:
+            left_fit = np.polyfit(lefty, leftx, 2)
+            return left_fit, [0, 0, 0],left_can,right_can
+        elif left_can == 0 and right_can == 1:
+            right_fit = np.polyfit(righty, rightx, 2)
+            return [0, 0, 0], right_fit,left_can,right_can
+        elif left_can == 0 and right_can == 0:
+            return [0, 0, 0], [0, 0, 0] ,left_can,right_can
         
 
     
@@ -228,37 +296,57 @@ class GetAngle:
 
     def get_angle(self, img):
         # img = self.img.copy()
+        mid = 160
         img_l, img_r = self._roi_img(img)
 
-        left = self.find_line(img_l,0, 0)
-        right = self.find_line(img_r, 160, self.midpoint)
+        left, left_mutation= self.find_line(img_l,0, 0)
+        # cv2.imwrite("../images/img_l.jpg",img_l)
+        right, right_mutation= self.find_line(img_r, 160, self.midpoint)
+        # cv2.imwrite("../images/img_r.jpg",img_r)
+
+        if (not left_mutation) and (not right_mutation):
+            bottom_x_left = calculate_bottom_x(left, self.bottom_y)
+            bottom_x_right = calculate_bottom_x(right, self.bottom_y)
+            angle = (bottom_x_left + bottom_x_right)/2 - mid
+            return angle
+        elif left_mutation:
+            print("left_mutation 朝着发生突变的方向转弯，自行补充逻辑")
+            pass
+        elif right_mutation:
+            print("right_mutation 朝着发生突变的方向转弯，自行补充逻辑")
+
+            pass
+
+        
 
 
-        bottom_x_left = calculate_bottom_x(left, self.bottom_y)
-        bottom_x_right = calculate_bottom_x(right, self.bottom_y)
+
         
         #可视化
-        mid = 160
-        angle = int(bottom_x_left / 2 + bottom_x_right / 2) - mid
-        # print(angle)
-        # cv2.line(img, (mid, 0), (mid,img.shape[0]), (0, 0, 255), thickness=10)
-        # cv2.line(img,(bottom_x_left,self.bottom_y),(bottom_x_right,self.bottom_y),(255,0,0), thickness=10)
-        # cv2.line(img, (mid, self.bottom_y), (int(bottom_x_left / 2 + bottom_x_right / 2), self.bottom_y), (0, 255, 0),
-        #         thickness=10)
+        # mid = 160
+        # angle = int(bottom_x_left / 2 + bottom_x_right / 2) - mid
+        # # print(angle)
+        # # cv2.line(img, (mid, 0), (mid,img.shape[0]), (0, 0, 255), thickness=10)
+        # # cv2.line(img,(bottom_x_left,self.bottom_y),(bottom_x_right,self.bottom_y),(255,0,0), thickness=10)
+        # # cv2.line(img, (mid, self.bottom_y), (int(bottom_x_left / 2 + bottom_x_right / 2), self.bottom_y), (0, 255, 0),
+        # #         thickness=10)
         
-        # cv2.imwrite("../images/carlinrbias.jpg",img)
+        # # cv2.imwrite("../images/carlinrbias.jpg",img)
         
-        angle = (bottom_x_left + bottom_x_right)/2 - mid
+        # angle = (bottom_x_left + bottom_x_right)/2 - mid
 
-        return angle
+        # return angle
 
 
 
 
 
 if __name__ == '__main__':
-    image = cv2.imread('../images/mask.jpg', cv2.IMREAD_GRAYSCALE)
-    resized_image = cv2.resize(image, (240, 320), interpolation=cv2.INTER_AREA)
+    image = cv2.imread('../images/resized_image2.jpg', cv2.IMREAD_GRAYSCALE)
+    # image = cv2.imread('../images/resized_img.jpg')
+    resized_image = cv2.resize(image, (320, 240), interpolation=cv2.INTER_AREA)
+    # cv2.imwrite("../images/resized_image3.jpg",resized_image)
+    
     gt = GetAngle()
     # print(image.shape)
     # print(type(image))
